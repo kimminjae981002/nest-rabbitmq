@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class MessagesService {
+  constructor(@Inject('MESSAGE_SERVICE') private rabbitClient: ClientProxy) {}
   placeMessage(createMessageDto: CreateMessageDto) {
-    return 'This action adds a new message';
+    this.rabbitClient.emit('message-place', createMessageDto);
+
+    return { message: 'message rabbitmq' };
   }
 
   findAll() {

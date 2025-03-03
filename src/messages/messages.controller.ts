@@ -16,7 +16,7 @@ export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
 
   @Post('place-message')
-  placeMessage(@Body() createMessageDto: CreateMessageDto) {
+  create(@Body() createMessageDto: CreateMessageDto) {
     return this.messagesService.placeMessage(createMessageDto);
   }
 
