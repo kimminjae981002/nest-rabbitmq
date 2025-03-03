@@ -1,4 +1,12 @@
-import { Client, ClientProxy, Transport } from '@nestjs/microservices';
+import { Inject } from '@nestjs/common';
+import {
+  Client,
+  ClientProxy,
+  MessagePattern,
+  Payload,
+  RmqContext,
+  Transport,
+} from '@nestjs/microservices';
 import {
   ConnectedSocket,
   MessageBody,
@@ -12,40 +20,46 @@ import { Namespace, Socket } from 'socket.io';
   namespace: 'chat',
   path: '/socket.io',
   cors: {
-    origin: '*', // CORS 설정
+    origin: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
   },
 })
 export class EventsGateway {
-  // socket 서버 실행
-  @WebSocketServer()
-  io: Namespace;
+  constructor(@Inject('MESSAGE_SERVICE') private client: ClientProxy) {}
+  @WebSocketServer() io: Namespace;
 
-  @Client({
-    transport: Transport.RMQ, // RabbitMQ 사용
-    options: {
-      urls: ['amqp://localhost:5672'],
-      queue: 'messages_queue', // 큐 이름
-      queueOptions: { durable: false }, // 큐가 지속되지 않도록 설정
-    },
-  })
-  private client: ClientProxy; // RabbitMQ와 연결된 클라이언트
-
-  constructor() {}
-  @SubscribeMessage('BACKEND.Message')
-  async message(
-    @MessageBody() data: { message: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    console.log(data.message);
-    this.io.server.of('chat').emit('BACKEND.Message', data.message);
+  @MessagePattern('messages_queue') // 'messages_queue' 이벤트 패턴에 대한 핸들러
+  async handleChatMessage(data: { message: string; roomId: string }) {
+    console.log('Received message from RabbitMQ:', data.message);
+    this.io.server.to(data.roomId).emit('BACKEND.Message', data.message);
   }
 
-  @SubscribeMessage('messages_queue')
-  async handleChatMessage(message: string) {
-    console.log('Received message from RabbitMQ:', message);
-    // WebSocket 클라이언트들에게 메시지를 전송
-    this.io.server.of('chat').emit('BACKEND.Message', message);
+  @SubscribeMessage('joinRoom')
+  handleJoinRoom(
+    @MessageBody() data: { roomId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(data.roomId);
+    console.log(`${client.id} has joined room: ${data.roomId}`);
+  }
+
+  // events.gateway.ts
+  @SubscribeMessage('BACKEND.Message')
+  async message(
+    @MessageBody() data: { roomId: string; message: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(`Message from room ${data.roomId}: ${data.message}`);
+
+    // 큐에 메시지 저장
+    await this.client.emit('messages_queue', {
+      message: data.message,
+      roomId: data.roomId,
+    }); // emit 할 때, payload를 메시지에 맞게 전달
+    this.io.server
+      .of('chat')
+      .to(data.roomId)
+      .emit('BACKEND.Message', data.message);
   }
 }
