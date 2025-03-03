@@ -29,11 +29,11 @@ export class EventsGateway {
   constructor(@Inject('MESSAGE_SERVICE') private client: ClientProxy) {}
   @WebSocketServer() io: Namespace;
 
-  @MessagePattern('messages_queue') // 'messages_queue' 이벤트 패턴에 대한 핸들러
-  async handleChatMessage(data: { message: string; roomId: string }) {
-    console.log('Received message from RabbitMQ:', data.message);
-    this.io.server.to(data.roomId).emit('BACKEND.Message', data.message);
-  }
+  // @MessagePattern('messages_queue') // 'messages_queue' 이벤트 패턴에 대한 핸들러
+  // async handleChatMessage(data: { message: string; roomId: string }) {
+  //   console.log('Received message from RabbitMQ:', data.message);
+  //   this.io.server.to(data.roomId).emit('BACKEND.Message', data.message);
+  // }
 
   @SubscribeMessage('joinRoom')
   handleJoinRoom(
