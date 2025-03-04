@@ -33,6 +33,7 @@ export class EventsGateway {
   async message(@MessageBody() data: { message: string }) {
     // RabbitMQ Producer (messages_queue)에 전송된다.
     // -> RabbitMQ Consumer (messages_queue)로 받을 수 있다.
+    console.log('RabbitMQ Producer: ', data);
     this.client.emit('messages_queue', {
       message: data.message,
     }); //
@@ -40,7 +41,7 @@ export class EventsGateway {
 
   async sendMessage(data: any) {
     // RabbitMQ에서 받아와 실시간 유저에게 전송
-    console.log(data);
+    console.log('RabbitMQ -> Socket: ', data);
     this.io.server.of('chat').emit('BACKEND.Message', data.message);
   }
 }
