@@ -1,8 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { EventsGateway } from './events/events.gateway';
-import { MessageModule } from './message/message.module';
-import { MessageService } from './message/message.service';
 
 @Module({
   imports: [
@@ -19,8 +16,8 @@ import { MessageService } from './message/message.service';
         },
       },
     ]),
-    MessageModule,
   ],
-  providers: [EventsGateway, MessageService],
+  providers: [],
+  controllers: [],
 })
 export class AppModule {}

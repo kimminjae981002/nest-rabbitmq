@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>채팅 메시지</title>
-    <script src="https://cdn.socket.io/4.8.0/socket.io.min.js"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   </head>
   <body>
     <div><ul id="messages"></ul></div>
@@ -13,15 +13,10 @@
     <button id="submitMessageBtn">submit</button>
   </body>
   <script type="module">
-    // socket 8080 포트 연결, `room1` 채팅방에 연결
+    // socket 8000 포트 연결
     const socket = io('http://localhost:8080/chat', {
       transports: ['websocket'], // websocket만 사용
     });
-
-    // 특정 방에 입장 (roomId는 서버에서 받은 채팅방 ID)
-    const roomId = 'room1'; // 예시로 'room1'에 가입한다고 가정
-
-    socket.emit('joinRoom', { roomId: roomId }); // 방에 가입
 
     const message = document.getElementById('message');
     const messages = document.getElementById('messages');
@@ -48,7 +43,6 @@
         const messageText = message.value.trim(); // 입력 필드에서 메시지 가져오기
         if (messageText) {
           socket.emit('BACKEND.Message', {
-            roomId: 'room1', // 채팅방 ID 지정
             message: messageText,
           }); // 서버로 메시지 전송
           message.value = ''; // 메시지 전송 후 입력 필드 초기화
