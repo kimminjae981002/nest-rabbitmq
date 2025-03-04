@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { MessageModule } from './rabbitMQ-server/message.module';
 
 @Module({
   imports: [
+    MessageModule,
     ClientsModule.register([
       {
         name: 'MESSAGE_SERVICE',
@@ -17,6 +19,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       },
     ]),
   ],
+
   providers: [],
   controllers: [],
 })
