@@ -11,6 +11,9 @@
 
     <input type="text" id="message" />
     <button id="submitMessageBtn">submit</button>
+
+    <div id="reportDiv"></div>
+    <button id="reportPrompt">공지사항 작성</button>
   </body>
   <script type="module">
     // socket 8000 포트 연결
@@ -21,6 +24,7 @@
     const message = document.getElementById('message');
     const messages = document.getElementById('messages');
 
+    // 메시지
     socket.on('BACKEND.Message', (data) => {
       console.log(data, 'data');
       handelNewMessage(data);
@@ -48,5 +52,29 @@
           message.value = ''; // 메시지 전송 후 입력 필드 초기화
         }
       });
+
+    // 공지사항
+
+    // 공지사항 업데이트 받기
+    socket.on('BACKEND.Report', (report) => {
+      const reportDiv = document.getElementById('reportDiv');
+      if (report) {
+        // 공지사항을 화면에 표시
+        reportDiv.textContent = `공지사항: ${report}`;
+      } else {
+        // 공지사항이 없으면 초기화
+        reportDiv.textContent = '현재 공지사항이 없습니다.';
+      }
+    });
+
+    socket.on('BACKEND.ReportSuccessMessage', (data) => {
+      alert(data);
+    });
+
+    document.getElementById('reportPrompt').addEventListener('click', () => {
+      const report = prompt('공지사항을 입력하세요.');
+
+      socket.emit('BACKEND.Report', { report: report });
+    });
   </script>
 </html>
