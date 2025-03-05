@@ -44,4 +44,16 @@ export class EventsGateway {
     console.log('RabbitMQ -> Socket: ', data);
     this.io.server.of('chat').emit('BACKEND.Message', data.message);
   }
+
+  @SubscribeMessage('BACKEND.Report')
+  async report(
+    @MessageBody() data: { report: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { report } = data;
+
+    this.io.server.of('chat').emit('BACKEND.Report', report);
+
+    client.emit('BACKEND.ReportSuccessMessage', `공지사항이 등록되었습니다.`);
+  }
 }
