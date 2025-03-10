@@ -24,7 +24,24 @@ export class EventsGateway {
   @WebSocketServer()
   io: Namespace;
 
+  private readonly userSocketMap: Map<string, string> = new Map();
+
   constructor(@Inject('MESSAGE_SERVICE') private client: ClientProxy) {}
+
+  @SubscribeMessage('BACKEND.Login')
+  async login(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    // userId가 이미 존재하면 기존의 socket id를 바꿔주기
+    if (this.userSocketMap.has(data.userId)) {
+      this.userSocketMap.set(data.userId, client.id);
+    } else {
+      this.userSocketMap.set(data.userId, client.id);
+    }
+
+    console.log(this.userSocketMap);
+  }
 
   // events.gateway.ts
   @SubscribeMessage('BACKEND.Message')

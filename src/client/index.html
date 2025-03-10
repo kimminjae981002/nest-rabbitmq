@@ -14,11 +14,25 @@
 
     <div id="reportDiv"></div>
     <button id="reportPrompt">공지사항 작성</button>
+
+    <button id="loginButton">login</button>
   </body>
   <script type="module">
     // socket 8000 포트 연결
     const socket = io('http://localhost:8080/chat', {
       transports: ['websocket'], // websocket만 사용
+    });
+
+    socket.on('connect', (data) => {
+      const userId = 'userADBASDWEQW123';
+
+      socket.emit('BACKEND.Login', { userId });
+    });
+
+    document.getElementById('loginButton').addEventListener('click', () => {
+      const userId = 'userADBASDWEQW123';
+
+      socket.emit('BACKEND.Login', { userId });
     });
 
     const message = document.getElementById('message');
